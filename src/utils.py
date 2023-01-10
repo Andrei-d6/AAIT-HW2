@@ -3,15 +3,19 @@ from fastai.data.transforms import get_image_files
 from typing import Optional, List, Callable
 from fastai.torch_core import set_seed
 from fastai.learner import Learner
+
+
+from cleanlab.filter import find_label_issues
 from pathlib import Path
 
-
 import pandas as pd
+import numpy as np
 import torch
 import yaml
 
 
-__all__ = ['seed_everything', 'load_configuration', 'do_fit', 'save_preds']
+__all__ = ['seed_everything', 'load_configuration', 'do_fit', 
+           'save_preds', 'save_clean_labels']
 
 
 
@@ -62,7 +66,7 @@ def do_fit(
 
     if save_state_dict:
         learn.export(f"{learn.model_dir}/{save_name}.pkl")
-        torch.save(learn.model.state_dict(), f"{learn.model_dir}/{save_name}.pth")
+        torch.save(learn.model.state_dict(), f"{learn.model_dir}/{save_name}_dict.pth")
 
     if show_results:
         learn.show_results(max_n=1, figsize=(5, 5))
@@ -96,3 +100,36 @@ def save_preds(learn: Learner, config: dict, iteration: int = None):
         save_path = f"{split[0]}_{iteration}.{split[1]}"
 
     df.to_csv(save_path, index=False)
+
+
+def save_clean_labels(learn: Learner, config: dict):
+    
+    path_annotations = f"{config['PATH_BASE_DATA']}/{config['PATH_LABELED_ANNOTATIONS']}"
+    df = pd.read_csv(path_annotations)
+    
+    labels = df['label_idx'].values
+    
+    path_images = f"{config['PATH_BASE_DATA']}/{config['PATH_LABELED_IMAGES']}"
+    unlabeled_images = get_image_files(path_images)
+    
+    unlabeled_images = sorted(unlabeled_images, key=lambda x: len(x.name))
+    
+    dl = learn.dls.test_dl(unlabeled_images)
+    preds, _ = learn.get_preds(dl=dl)
+    
+    labels = np.array(labels)
+    preds  = np.array(preds)
+    
+    ordered_label_issues = find_label_issues(
+        labels=labels,
+        pred_probs=preds,
+        return_indices_ranked_by='self_confidence',
+    )
+    
+    error_df = df.loc[ordered_label_issues]
+    clean_idx = [idx for idx, _ in enumerate(df.values) if not idx in ordered_label_issues]
+    
+    clean_df = df.loc[clean_idx]
+    
+    save_path = f"{config['PATH_BASE_DATA']}/{config['PATH_CLEAN_ANNOTATIONS']}"
+    clean_df.to_csv(save_path, index=False)

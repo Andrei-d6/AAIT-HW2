@@ -1,6 +1,7 @@
 from fastai.vision.all import *
 
 from src.data import get_dls_task1, get_dls_task2
+import torch
 
 
 __all__ = ['get_learner_task1', 'get_learner_task2']
@@ -54,6 +55,11 @@ def get_learner_task2(config: dict) -> Learner:
             metrics=[accuracy, top_k_accuracy],
             loss_func=LabelSmoothingCrossEntropy()
         )
+
+        if 'PRETRAINED' in config:
+            state_dict = torch.load(f"{learn.model_dir}/{config['PRETRAINED']}")
+            learn.model.load_state_dict(state_dict)
+
     else:
 
         n_out, sa, sym = config['N_OUT'], config['SA'], config['SYM']
