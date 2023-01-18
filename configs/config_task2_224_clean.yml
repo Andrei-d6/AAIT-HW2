@@ -23,4 +23,4 @@ ARCH:           'resnet50' # Network architecture (ResNet50, xResNet50)
 OPT:            'adam'      # Optimizer (Adam, ranger)
 FP16:           True        # Mixed precision training
 
-PRE_TRAINED:    'task1_resnet50_iteration2_unfrozen_dict.pth'
+PRE_TRAINED:    'task1_resnet50_224_iter2_unfrozen_dict.pth'

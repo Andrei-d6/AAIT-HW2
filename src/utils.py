@@ -1,9 +1,10 @@
 from fastai.callback.tracker import SaveModelCallback
 from fastai.data.transforms import get_image_files
 from typing import Optional, List, Callable
+from torchvision.models import ResNet50_Weights
+from fastai.learner import load_learner
 from fastai.torch_core import set_seed
 from fastai.learner import Learner
-
 
 from cleanlab.filter import find_label_issues
 from pathlib import Path
@@ -12,10 +13,11 @@ import pandas as pd
 import numpy as np
 import torch
 import yaml
+import os
 
 
 __all__ = ['seed_everything', 'load_configuration', 'do_fit', 
-           'save_preds', 'save_clean_labels']
+           'save_preds', 'save_clean_labels', 'create_submission']
 
 
 
@@ -133,3 +135,25 @@ def save_clean_labels(learn: Learner, config: dict):
     
     save_path = f"{config['PATH_BASE_DATA']}/{config['PATH_CLEAN_ANNOTATIONS']}"
     clean_df.to_csv(save_path, index=False)
+
+
+def create_submission(
+    path_learn: str, 
+    path_test_images: str,
+    submission_name: str,
+    base_model_dir: str = 'models',
+    base_save_dir: str = 'submissions',
+    cpu: bool = False
+):
+    
+    learn = load_learner(f"{base_model_dir}/{path_learn}", cpu=cpu)
+    test_images = get_image_files(path_test_images)
+    test_images = sorted(test_images, key=lambda x: len(x.name))
+
+    test_dl = learn.dls.test_dl(test_images)
+    preds, _ = learn.get_preds(dl=test_dl)
+    preds = preds.argmax(dim=1)
+
+    paths = [path.name for path in test_images]
+    df = pd.DataFrame(list(zip(paths, preds.numpy())), columns=['sample', 'label'])
+    df.to_csv(f"{base_save_dir}/{submission_name}", index=False)

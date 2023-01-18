@@ -1,4 +1,5 @@
 from fastai.vision.all import *
+from torchvision.models import ResNet50_Weights
 
 from src.data import get_dls_task1, get_dls_task2
 import torch
@@ -8,7 +9,7 @@ __all__ = ['get_learner_task1', 'get_learner_task2']
 
 
 
-def get_learner_task1(config: dict, iteration: int = 0) -> Learner:
+def get_learner_task1(config: dict, iteration: int = 0, resnet_weights: bool = True) -> Learner:
 
     dls = get_dls_task1(config, iteration=iteration)
 
@@ -21,13 +22,23 @@ def get_learner_task1(config: dict, iteration: int = 0) -> Learner:
         arch = resnet50
         opt_func = Adam if config['OPT'] == 'adam' else ranger
 
-        learn = vision_learner(
-            dls,
-            arch,
-            opt_func=opt_func,
-            metrics=[accuracy, top_k_accuracy],
-            loss_func=CrossEntropyLossFlat()
-        )
+        if resnet_weights:
+            learn = vision_learner(
+                dls,
+                arch,
+                pretrained=ResNet50_Weights.DEFAULT,
+                opt_func=opt_func,
+                metrics=[accuracy, top_k_accuracy],
+                loss_func=CrossEntropyLossFlat()
+            )
+        else:
+            learn = vision_learner(
+                dls,
+                arch,
+                opt_func=opt_func,
+                metrics=[accuracy, top_k_accuracy],
+                loss_func=CrossEntropyLossFlat()
+            )
 
     if config['FP16']:
         learn = learn.to_fp16()
