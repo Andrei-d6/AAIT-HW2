@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--seed', default=42, type=int, help="Seed for reproducibility")
 parser.add_argument('--valid_pct', default=0.2, type=int,
-					help="Percetange of images for the validation set from the labeled samples")
+					help="Percentage of images for the validation set from the labeled samples")
 
 parser.add_argument('--in_file', type=str, help='Path to the original annotations', required=True)
 parser.add_argument('--out_file', type=str, required=True,
