@@ -1,0 +1,27 @@
+# Data settings
+PATH_BASE_DATA:           'data/'
+PATH_LABELED_ANNOTATIONS: 'task2/train_data/annotations.csv'
+PATH_CLEAN_ANNOTATIONS:   'task2/train_data/clean_annotations.csv'
+PATH_LABELED_IMAGES:      'task2/train_data/'
+
+COL_IMAGE_PATH:   'renamed_path'
+COL_LABEL:        'label_idx'
+
+SEED:           42
+
+# DataLoaders configuration
+SIZE:            224
+BATCH_SIZE:      64
+VALID_PCT:       0.2
+NUM_WORKERS:     0
+MIN_SCALE:       0.35
+FLIP_ITEM:       0.5
+RANDOM_ERASE_P:  0.5
+MAX_COUNT:       3
+
+# Learner configuration
+ARCH:           'resnet50' # Network architecture (ResNet50, xResNet50)
+OPT:            'adam'      # Optimizer (Adam, ranger)
+FP16:           True        # Mixed precision training
+
+PRETRAINED:    'task1_resnet50_iteration2_unfrozen_dict.pth'

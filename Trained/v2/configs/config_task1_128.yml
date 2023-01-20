@@ -1,0 +1,26 @@
+# Data settings
+PATH_BASE_DATA:   'data/'
+PATH_LABELED_ANNOTATIONS: 'task1/train_data/annotations_labeled.csv'
+PATH_UNLABLED_ANNOTATIONS: 'task1/train_data/annotations_unlabeled.csv'
+
+PATH_UNLABELED_IMAGES: 'data/task1/train_data/images/unlabeled'
+
+
+COL_IMAGE_PATH:   'sample'
+COL_LABEL:        'label'
+COL_VALID:        'is_valid'
+
+SEED:           42
+
+# DataLoaders configuration
+SIZE:            128
+BATCH_SIZE:      128
+NUM_WORKERS:     0
+MIN_SCALE:       0.35
+FLIP_ITEM:       0.5
+
+
+# Learner configuration
+ARCH:           'resnet50' # Network architecture (ResNet50, xResNet50)
+OPT:            'adam'      # Optimizer (Adam, ranger)
+FP16:           True        # Mixed precision training
